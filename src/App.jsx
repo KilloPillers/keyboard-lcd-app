@@ -1,9 +1,58 @@
 import { useEffect, useRef, useState } from "react";
+import { io } from "socket.io-client";
 import "./App.css";
 
 const PIXEL_SIZE = 14; // try making this bigger to see the effect clearly
 const LCD_WIDTH = 128;
 const LCD_HEIGHT = 32;
+
+const socket = io("http://localhost:3000");
+
+function arraysEqual2D(a, b) {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i].length !== b[i].length) return false;
+    for (let j = 0; j < a[i].length; j++) {
+      if (a[i][j] !== b[i][j]) return false;
+    }
+  }
+  return true;
+}
+
+function pixelsToByteArray(pixels) {
+  const bytesPerRow = LCD_WIDTH / 8;
+  const buffer = new Uint8Array(LCD_HEIGHT * bytesPerRow);
+
+  for (let row = 0; row < LCD_HEIGHT; row++) {
+    for (let byteIndex = 0; byteIndex < bytesPerRow; byteIndex++) {
+      let byte = 0;
+      for (let bit = 0; bit < 8; bit++) {
+        byte = (byte << 1) | pixels[row][byteIndex * 8 + bit];
+      }
+      buffer[row * bytesPerRow + byteIndex] = byte;
+    }
+  }
+
+  return buffer; // Uint8Array of 512 bytes
+}
+
+function byteArrayToPixels(byteArray) {
+  const bytesPerRow = LCD_WIDTH / 8;
+  const pixels = Array.from({ length: LCD_HEIGHT }, () =>
+    Array(LCD_WIDTH).fill(0),
+  );
+
+  for (let byteIndex = 0; byteIndex < byteArray.length; byteIndex++) {
+    const row = Math.floor(byteIndex / bytesPerRow);
+    const colByte = byteIndex % bytesPerRow;
+    const byte = byteArray[byteIndex];
+    for (let bit = 0; bit < 8; bit++) {
+      pixels[row][colByte * 8 + bit] = (byte >> (7 - bit)) & 1;
+    }
+  }
+
+  return pixels;
+}
 
 function App() {
   const canvasRef = useRef(null);
@@ -23,6 +72,20 @@ function App() {
   let prevY = null;
 
   useEffect(() => {
+    socket.on("DrawEvent", (byteArrayBuffer) => {
+      const byteArray = new Uint8Array(byteArrayBuffer);
+      const newPixels = byteArrayToPixels(byteArray);
+      setPixels(newPixels);
+      pixelsRef.current = newPixels;
+    });
+
+    return () => {
+      socket.off("DrawEvent");
+      socket.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
@@ -31,7 +94,7 @@ function App() {
       if (x < 0 || x >= LCD_WIDTH || y < 0 || y >= LCD_HEIGHT) return;
 
       // Update pixel buffer
-      pixelsRef.current[y][x] = state;
+      pixelsRef.current[y][x] = color.current;
 
       // Draw on canvas
       drawPixel(x, y, state);
@@ -131,10 +194,12 @@ function App() {
     };
 
     const handleMouseUp = () => {
-      isDrawingRef.current = false;
       prevX = null;
       prevY = null;
       setPixels(pixelsRef.current);
+      const byteArray = pixelsToByteArray(pixelsRef.current);
+      if (isDrawingRef.current) socket.emit("DrawEvent", byteArray);
+      isDrawingRef.current = false;
     };
 
     // Attach listeners
@@ -157,6 +222,8 @@ function App() {
     pixelsRef.current = Array.from({ length: LCD_HEIGHT }, () =>
       Array(LCD_WIDTH).fill(0),
     );
+    const byteArray = pixelsToByteArray(pixelsRef.current);
+    socket.emit("DrawEvent", byteArray);
   };
 
   return (
@@ -172,11 +239,12 @@ function App() {
       <div
         style={{ maxWidth: "800px", marginBottom: "2rem", textAlign: "center" }}
       >
-        <h1>Draw on my keyboard LCD</h1>
+        <h1>Draw Something To My LCD</h1>
         <p>
-          I made a web portal where anyone can write a message that will be
-          displayed on my keyboard.
+          I made a web portal where anyone can live update my keyboard's lcd.
+          Want to find out how I did this?
         </p>
+        <a>Read Here</a>
       </div>
 
       {/* Toolbar */}
