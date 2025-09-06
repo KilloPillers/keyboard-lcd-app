@@ -10,10 +10,9 @@ var URL;
 if (import.meta.env.MODE === "development") {
   URL = "http://localhost:3000";
 } else {
-  URL = "nodejs-production-9769.up.railway.app:3000";
+  URL = "nodejs-production-9769.up.railway.app";
 }
 
-console.log(URL);
 const socket = io(URL);
 
 function pixelsToByteArray(pixels) {
@@ -196,7 +195,6 @@ function App() {
       prevY = null;
       setPixels(pixelsRef.current);
       const byteArray = pixelsToByteArray(pixelsRef.current);
-      console.log(pixelsRef.current);
       if (isDrawingRef.current) socket.emit("DrawEvent", byteArray);
       isDrawingRef.current = false;
     };
