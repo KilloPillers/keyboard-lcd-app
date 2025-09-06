@@ -167,10 +167,54 @@ function App() {
     }
 
     // Event handlers
-    const handleMouseDown = (e) => {
+    // Convert touch event into canvas coords
+    function getTouchPos(canvas, touch) {
       const rect = canvas.getBoundingClientRect();
-      const x = Math.floor((e.clientX - rect.left) / PIXEL_SIZE);
-      const y = Math.floor((e.clientY - rect.top) / PIXEL_SIZE);
+
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+
+      return {
+        x: Math.floor(((touch.clientX - rect.left) * scaleX) / PIXEL_SIZE),
+        y: Math.floor(((touch.clientY - rect.top) * scaleY) / PIXEL_SIZE),
+      };
+    }
+
+    // Touch handlers
+    const handleTouchStart = (e) => {
+      e.preventDefault(); // Prevent scrolling while drawing
+      const touch = e.touches[0];
+      const { x, y } = getTouchPos(canvas, touch);
+      prevX = x;
+      prevY = y;
+      isDrawingRef.current = true;
+      drawPixelWithPen(x, y, color.current, penSize);
+    };
+
+    const handleTouchMove = (e) => {
+      if (!isDrawingRef.current) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      const { x, y } = getTouchPos(canvas, touch);
+
+      if (x !== prevX || y !== prevY) {
+        drawLine(prevX, prevY, x, y);
+        prevX = x;
+        prevY = y;
+      }
+    };
+
+    const handleTouchEnd = () => {
+      prevX = null;
+      prevY = null;
+      setPixels(pixelsRef.current);
+      const byteArray = pixelsToByteArray(pixelsRef.current);
+      if (isDrawingRef.current) socket.emit("DrawEvent", byteArray);
+      isDrawingRef.current = false;
+    };
+
+    const handleMouseDown = (e) => {
+      const { x, y } = getTouchPos(canvas, e);
       prevX = x;
       prevY = y;
       isDrawingRef.current = true;
@@ -179,10 +223,7 @@ function App() {
 
     const handleMouseMove = (e) => {
       if (!isDrawingRef.current) return;
-      const rect = canvas.getBoundingClientRect();
-      const x = Math.floor((e.clientX - rect.left) / PIXEL_SIZE);
-      const y = Math.floor((e.clientY - rect.top) / PIXEL_SIZE);
-
+      const { x, y } = getTouchPos(canvas, e);
       if (x !== prevX || y !== prevY) {
         drawLine(prevX, prevY, x, y);
         prevX = x;
@@ -204,11 +245,19 @@ function App() {
     canvas.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
 
+    canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
+    canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+    canvas.addEventListener("touchend", handleTouchEnd);
+
     // Cleanup
     return () => {
       canvas.removeEventListener("mousedown", handleMouseDown);
       canvas.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
+
+      canvas.removeEventListener("touchstart", handleTouchStart);
+      canvas.removeEventListener("touchmove", handleTouchMove);
+      canvas.removeEventListener("touchend", handleTouchEnd);
     };
   }, [penSize, pixels]);
 
@@ -274,7 +323,14 @@ function App() {
         ref={canvasRef}
         width={LCD_WIDTH * PIXEL_SIZE}
         height={LCD_HEIGHT * PIXEL_SIZE}
-        style={{ border: "2px solid grey", imageRendering: "pixelated" }}
+        style={{
+          border: "2px solid grey",
+          imageRendering: "pixelated",
+          maxWidth: "100%",
+          height: "auto",
+          touchAction: "none",
+          userSelect: "none",
+        }}
       />
     </div>
   );
