@@ -7,10 +7,10 @@ const LCD_WIDTH = 128;
 const LCD_HEIGHT = 32;
 
 var URL;
-if (import.meta.env.MODE === "production") {
-  URL = "nodejs-production-9769.up.railway.app";
-} else {
+if (import.meta.env.MODE === "development") {
   URL = "http://localhost:3000";
+} else {
+  URL = "nodejs-production-9769.up.railway.app";
 }
 
 console.log(URL);
