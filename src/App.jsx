@@ -6,18 +6,15 @@ const PIXEL_SIZE = 14; // try making this bigger to see the effect clearly
 const LCD_WIDTH = 128;
 const LCD_HEIGHT = 32;
 
-const socket = io("http://localhost:3000");
-
-function arraysEqual2D(a, b) {
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) {
-    if (a[i].length !== b[i].length) return false;
-    for (let j = 0; j < a[i].length; j++) {
-      if (a[i][j] !== b[i][j]) return false;
-    }
-  }
-  return true;
+var URL;
+if (import.meta.env.MODE === "production") {
+  URL = "nodejs-production-9769.up.railway.app";
+} else {
+  URL = "http://localhost:3000";
 }
+
+console.log(URL);
+const socket = io(URL);
 
 function pixelsToByteArray(pixels) {
   const bytesPerRow = LCD_WIDTH / 8;
@@ -58,7 +55,7 @@ function App() {
   const canvasRef = useRef(null);
   const isDrawingRef = useRef(false);
   // default drawing color
-  const color = useRef("white");
+  const color = useRef(1); // 1 - white 0 - black
   const [penSize, setPenSize] = useState(1);
   const [pixels, setPixels] = useState();
 
@@ -112,6 +109,7 @@ function App() {
       );
     }
 
+    // Pen drawing function (draws multiple pixels based on pensize)
     function drawPixelWithPen(x, y, state, size) {
       const offset = Math.floor(size / 2);
       for (let dy = 0; dy < size; dy++) {
@@ -198,6 +196,7 @@ function App() {
       prevY = null;
       setPixels(pixelsRef.current);
       const byteArray = pixelsToByteArray(pixelsRef.current);
+      console.log(pixelsRef.current);
       if (isDrawingRef.current) socket.emit("DrawEvent", byteArray);
       isDrawingRef.current = false;
     };
