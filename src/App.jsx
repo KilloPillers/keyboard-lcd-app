@@ -10,7 +10,7 @@ var URL;
 if (import.meta.env.MODE === "development") {
   URL = "http://localhost:3000";
 } else {
-  URL = "nodejs-production-9769.up.railway.app";
+  URL = "nodejs-production-9769.up.railway.app:3000";
 }
 
 console.log(URL);
