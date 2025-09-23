@@ -1,16 +1,37 @@
+import React from "react";
+import Markdown from "react-markdown";
+import readme from "../README.md?raw";
+
 function Summary() {
   return (
     <div
       style={{
         display: "flex",
-        flexDirection: "column",
-        alignItems: "start",
-        justifyContent: "start",
+        flexDirection: "row",
+        alignItems: "flex-start",
+        alignSelf: "self-start",
+        justifyContent: "flex-start",
         width: "100%",
+        marginTop: "375px",
+        textAlign: "left",
       }}
     >
-      <h1>How this was made</h1>
-      <p>test</p>
+      <div
+        style={{
+          flex: 6,
+        }}
+      >
+        <Markdown>{readme}</Markdown>
+      </div>
+      <img
+        style={{
+          flex: 4,
+          width: 600,
+          height: 600,
+        }}
+        src="collage.png"
+        alt="Images"
+      ></img>
     </div>
   );
 }

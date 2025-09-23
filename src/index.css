@@ -11,8 +11,7 @@
     url('/keyboard_wireframe.svg');
   background-size: auto;
   background-repeat: no-repeat;
-  background-position: calc(50%) calc(50%), calc(50% + 550px) calc(50% - 445px);
-  ;
+  background-position: calc(50%) calc(50%), calc(50% + 600px) calc(50% - 725px);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;

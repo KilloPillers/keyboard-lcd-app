@@ -291,7 +291,7 @@ function App() {
       <div
         style={{ maxWidth: "800px", marginBottom: "2rem", textAlign: "center" }}
       >
-        <h1>LCD Editor</h1>
+        <h1>Live LCD Editor</h1>
         <p>
           I made a web portal where anyone can live update my keyboard's lcd.
           Want to find out how I did this? Read below
@@ -335,11 +335,6 @@ function App() {
           height: "auto",
           touchAction: "none",
           userSelect: "none",
-        }}
-      />
-      <div
-        style={{
-          height: "250px",
         }}
       />
       <Summary />

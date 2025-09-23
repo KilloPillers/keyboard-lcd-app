@@ -1,12 +1,10 @@
-# React + Vite
+## About
+Hi, I’m a keyboard enthusiast and currently daily driving the **boardsource unicorne**. 
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Out of the box an excellent keyboard however, the slave board’s LCD, by default, displays the “lulu” and boardsource logo (boring). After all, what’s the point of a _custom_ keyboard if I can’t customize every part of it?
 
-Currently, two official plugins are available:
+The unicorne runs on **QMK firmware**, so I started experimenting. Compiling QMK was straightforward, and replacing the displayed image was even simpler. Just create an 128x32 monochrome bitmap image and with a tool like [LCD Assistant](https://projedefteri.com/en/tools/lcd-assistant/) you can generate code that can be dropped straight into the firmware.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+But I wanted something more robust, I wanted a way to change the display dynamically. Specifically, I wanted a **drawing tool** that could live-update the LCD with each brush stroke.
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+This project is that solution: custom firmware + frontend + backend stack that lets me or anyone edit and stream images to my keyboard’s LCD in real time.
