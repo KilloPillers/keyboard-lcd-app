@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import "./App.css";
+import Summary from "./Summary";
 
 const PIXEL_SIZE = 14; // try making this bigger to see the effect clearly
 const LCD_WIDTH = 128;
@@ -14,6 +15,11 @@ if (import.meta.env.MODE === "development") {
 }
 
 const socket = io(URL);
+
+// TODO:
+// use a pixelated font to match the lcd's pixels
+// add some icons to the context buttons
+// consider adding pictures to the
 
 function pixelsToByteArray(pixels) {
   const bytesPerRow = LCD_WIDTH / 8;
@@ -285,12 +291,11 @@ function App() {
       <div
         style={{ maxWidth: "800px", marginBottom: "2rem", textAlign: "center" }}
       >
-        <h1>Draw Something To My LCD</h1>
+        <h1>LCD Editor</h1>
         <p>
           I made a web portal where anyone can live update my keyboard's lcd.
-          Want to find out how I did this?
+          Want to find out how I did this? Read below
         </p>
-        <a>Read Here</a>
       </div>
 
       {/* Toolbar */}
@@ -332,6 +337,12 @@ function App() {
           userSelect: "none",
         }}
       />
+      <div
+        style={{
+          height: "250px",
+        }}
+      />
+      <Summary />
     </div>
   );
 }
