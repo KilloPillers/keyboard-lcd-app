@@ -41,16 +41,34 @@ function reverseByte(b) {
   return b;
 }
 
-// Reversing the byteArray is the equivalent of flipping horizontally
-function reverseByteArray(byteArray) {
-  const bytesPerRow = LCD_WIDTH / 8;
-  const buffer = new Uint8Array(LCD_HEIGHT * bytesPerRow);
+// Reversing the byteArray is equivalent of flipping image vertically
+function flipByteArrayVertically(byteArray) {
+  const buffer = new Uint8Array(byteArray.length);
 
   byteArray.reverse().forEach((byte, index) => {
     buffer[index] = reverseByte(byte)
   })
 
   return buffer
+}
+
+
+function flipByteArrayHorizontally(byteArray) {
+  const width = 128;
+  const height = 32;
+  const bytesPerRow = width / 8;
+  const buffer = new Uint8Array(byteArray.length);
+
+  for (let y = 0; y < height; y++) {
+    const rowStart = y * bytesPerRow;
+    for (let x = 0; x < bytesPerRow; x++) {
+      const srcIndex = rowStart + x;
+      const dstIndex = rowStart + (bytesPerRow - 1 - x);
+      buffer[dstIndex] = reverseByte(byteArray[srcIndex]);
+    }
+  }
+
+  return buffer;
 }
 
 
@@ -81,8 +99,10 @@ function downloadBitMap(byteArray) {
 
 
   const colorTable = Uint8Array.fromHex("00000000FFFFFF00")
+  const vertical_byteArray = flipByteArrayVertically(byteArray); 
+  const horizontal_byteArray = flipByteArrayHorizontally(vertical_byteArray);
 
-  const file = concatUint8Arrays(header, infoHeader, colorTable, reverseByteArray(byteArray));
+  const file = concatUint8Arrays(header, infoHeader, colorTable, horizontal_byteArray);
 
   var blob = new Blob([file], { type: 'image/bmp' });
   var url = window.URL.createObjectURL(blob);
