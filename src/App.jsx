@@ -41,6 +41,7 @@ function reverseByte(b) {
   return b;
 }
 
+
 // Reversing the byteArray is equivalent of flipping image vertically
 function flipByteArrayVertically(byteArray) {
   const buffer = new Uint8Array(byteArray.length);
@@ -99,6 +100,7 @@ function downloadBitMap(byteArray) {
 
 
   const colorTable = Uint8Array.fromHex("00000000FFFFFF00")
+
   const vertical_byteArray = flipByteArrayVertically(byteArray); 
   const horizontal_byteArray = flipByteArrayHorizontally(vertical_byteArray);
 
@@ -131,7 +133,7 @@ function pixelsToByteArray(pixels) {
     }
   }
 
-  return buffer; // Uint8Array of 512 bytes
+  return buffer; 
 }
 
 function byteArrayToPixels(byteArray) {
@@ -188,17 +190,17 @@ function App() {
     const ctx = canvas.getContext("2d");
 
     function setPixel(x, y, state) {
-      // Bounds check
+      // bounds check
       if (x < 0 || x >= LCD_WIDTH || y < 0 || y >= LCD_HEIGHT) return;
 
-      // Update pixel buffer
+      // update pixel buffer
       pixelsRef.current[y][x] = color.current;
 
-      // Draw on canvas
+      // draw on canvas
       drawPixel(x, y, state);
     }
 
-    // Pixel drawing function
+    // pixel drawing function
     function drawPixel(x, y, state) {
       // fill square
       ctx.fillStyle = state ? "white" : "black";
@@ -210,7 +212,7 @@ function App() {
       );
     }
 
-    // Pen drawing function (draws multiple pixels based on pensize)
+    // pen drawing function (draws multiple pixels based on pensize)
     function drawPixelWithPen(x, y, state, size) {
       const offset = Math.floor(size / 2);
       for (let dy = 0; dy < size; dy++) {
