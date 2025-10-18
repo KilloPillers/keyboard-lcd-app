@@ -17,9 +17,60 @@ if (import.meta.env.MODE === "development") {
 const socket = io(URL);
 
 // TODO:
-// use a pixelated font to match the lcd's pixels
 // add some icons to the context buttons
-// consider adding pictures to the
+
+function concatUint8Arrays(...arrays) {
+  const totalLength = arrays.reduce((sum, arr) => sum + arr.length, 0);
+
+  const result = new Uint8Array(totalLength);
+
+  let offset = 0;
+  for (const arr of arrays) {
+    result.set(arr, offset);
+    offset += arr.length;
+  }
+
+  return result;
+}
+
+
+function downloadBitMap(byteArray) {
+  // Header 
+  const signature = Uint8Array.fromHex("424D"); // BM
+  const file_size = Uint8Array.fromHex("00000263");
+  const reserved = Uint8Array.fromHex("00000000");
+  const data_offset = Uint8Array.fromHex("00000036");
+  
+  const header = concatUint8Arrays(signature, file_size, reserved, data_offset);
+  
+  // InfoHeaders
+  const size = Uint8Array.fromHex("00000028");
+  const width = Uint8Array.fromHex("00000080");
+  const height = Uint8Array.fromHex("00000020");
+  const planes = Uint8Array.fromHex("0001");
+  const bits_per_pixel = Uint8Array.fromHex("0001");
+  const compression = Uint8Array.fromHex("00000000");
+  const image_size = Uint8Array.fromHex("00000000");
+  const X_pixels_per_M = Uint8Array.fromHex("00000B13");
+  const Y_pixels_per_M = Uint8Array.fromHex("00000B13");
+  const colors_used = Uint8Array.fromHex("00000002");
+  const important_colors = Uint8Array.fromHex("00000000");
+
+  const infoHeader = concatUint8Arrays(size, width, height, planes, bits_per_pixel, compression, image_size, X_pixels_per_M, Y_pixels_per_M, colors_used, important_colors);
+
+  const file = concatUint8Arrays(header, infoHeader, byteArray);
+  var blob = new Blob([file], { type: 'image/bmp' });
+  var url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'image.bmp';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  window.URL.revokeObjectURL(url);
+}
+
 
 function pixelsToByteArray(pixels) {
   const bytesPerRow = LCD_WIDTH / 8;
@@ -320,6 +371,10 @@ function App() {
             <option value={3}>3</option>
           </select>
         </label>
+        <button onClick={() => {
+          const byteArray = pixelsToByteArray(pixelsRef.current);
+          downloadBitMap(byteArray);
+        }}>Download</button>
         <button onClick={clearCanvas}>Clear Canvas</button>
       </div>
 
