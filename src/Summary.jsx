@@ -14,6 +14,7 @@ function Summary() {
         width: "100%",
         marginTop: "375px",
         textAlign: "left",
+        gap: "2.5rem"
       }}
     >
       <div

@@ -62,6 +62,7 @@ function downloadBitMap(byteArray) {
   const colorTable = Uint8Array.fromHex("00000000FFFFFF00")
 
   const file = concatUint8Arrays(header, infoHeader, colorTable, byteArray);
+
   var blob = new Blob([file], { type: 'image/bmp' });
   var url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');
