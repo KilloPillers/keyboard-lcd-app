@@ -37,28 +37,31 @@ function concatUint8Arrays(...arrays) {
 function downloadBitMap(byteArray) {
   // Header 
   const signature = Uint8Array.fromHex("424D"); // BM
-  const file_size = Uint8Array.fromHex("00000263");
+  const file_size = Uint8Array.fromHex("3E020000");
   const reserved = Uint8Array.fromHex("00000000");
-  const data_offset = Uint8Array.fromHex("00000036");
+  const data_offset = Uint8Array.fromHex("3E000000");
   
   const header = concatUint8Arrays(signature, file_size, reserved, data_offset);
-  
   // InfoHeaders
-  const size = Uint8Array.fromHex("00000028");
-  const width = Uint8Array.fromHex("00000080");
-  const height = Uint8Array.fromHex("00000020");
-  const planes = Uint8Array.fromHex("0001");
-  const bits_per_pixel = Uint8Array.fromHex("0001");
+  const size = Uint8Array.fromHex("28000000");
+  const width = Uint8Array.fromHex("80000000");
+  const height = Uint8Array.fromHex("20000000");
+  const planes = Uint8Array.fromHex("0100");
+  const bits_per_pixel = Uint8Array.fromHex("0100");
   const compression = Uint8Array.fromHex("00000000");
-  const image_size = Uint8Array.fromHex("00000000");
-  const X_pixels_per_M = Uint8Array.fromHex("00000B13");
-  const Y_pixels_per_M = Uint8Array.fromHex("00000B13");
-  const colors_used = Uint8Array.fromHex("00000002");
+  const image_size = Uint8Array.fromHex("00020000");
+  const X_pixels_per_M = Uint8Array.fromHex("00000000");
+  const Y_pixels_per_M = Uint8Array.fromHex("00000000");
+  const colors_used = Uint8Array.fromHex("02000000");
   const important_colors = Uint8Array.fromHex("00000000");
+  
 
   const infoHeader = concatUint8Arrays(size, width, height, planes, bits_per_pixel, compression, image_size, X_pixels_per_M, Y_pixels_per_M, colors_used, important_colors);
 
-  const file = concatUint8Arrays(header, infoHeader, byteArray);
+
+  const colorTable = Uint8Array.fromHex("00000000FFFFFF00")
+
+  const file = concatUint8Arrays(header, infoHeader, colorTable, byteArray);
   var blob = new Blob([file], { type: 'image/bmp' });
   var url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');
