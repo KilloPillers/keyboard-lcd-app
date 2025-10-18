@@ -119,6 +119,24 @@ function downloadBitMap(byteArray) {
 }
 
 
+function bmpToByteArray(bmp) {
+  // verify BM
+  if (!(bmp[0] === 0x42 && bmp[1] === 0x4D)) {
+    return false
+  }
+  // verify file size
+  if (!(bmp[2] === 0x3E && bmp[3] === 0x02)) {
+    return false
+  }
+  // verify width and height
+  if (!(bmp[18] === 0x80 && bmp[22] === 0x20)) {
+    return false
+  }
+  
+  return bmp.slice(62)
+}
+
+
 function pixelsToByteArray(pixels) {
   const bytesPerRow = LCD_WIDTH / 8;
   const buffer = new Uint8Array(LCD_HEIGHT * bytesPerRow);
