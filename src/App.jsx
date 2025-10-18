@@ -18,6 +18,7 @@ const socket = io(URL);
 
 // TODO:
 // add some icons to the context buttons
+// split bmpToByteArray into 2 functions 1 for verifying bmp and another to get the bimap data
 
 function concatUint8Arrays(...arrays) {
   const totalLength = arrays.reduce((sum, arr) => sum + arr.length, 0);
@@ -119,7 +120,7 @@ function downloadBitMap(byteArray) {
 }
 
 
-function bmpToByteArray(bmp) {
+function verifyBitMap(bmp) {
   // verify BM
   if (!(bmp[0] === 0x42 && bmp[1] === 0x4D)) {
     return false
@@ -132,7 +133,11 @@ function bmpToByteArray(bmp) {
   if (!(bmp[18] === 0x80 && bmp[22] === 0x20)) {
     return false
   }
-  
+  return true
+}
+
+
+function getBitMapData(bmp) {
   return bmp.slice(62)
 }
 
@@ -180,6 +185,37 @@ function App() {
   const [penSize, setPenSize] = useState(1);
   const [pixels, setPixels] = useState();
 
+  function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+      readFileAsBytes(file);
+    }
+  }
+
+  function readFileAsBytes(file) {
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      const arrayBuffer = event.target.result;
+      const uint8Array = new Uint8Array(arrayBuffer);
+      if (verifyBitMap(uint8Array)) {
+        var buffer = getBitMapData(uint8Array);
+        buffer = flipByteArrayHorizontally(buffer);
+        buffer = flipByteArrayVertically(buffer);
+        const newPixels = byteArrayToPixels(buffer);
+        setPixels(newPixels);
+        pixelsRef.current = newPixels;
+        socket.emit("DrawEvent", buffer);
+      }
+    }
+
+    reader.onerror = (error) => {
+      console.log('Error reading file ', error)
+    }
+
+    reader.readAsArrayBuffer(file)
+  }
+  
   // 2d pixel buffer
   const pixelsRef = useRef(
     Array.from({ length: LCD_HEIGHT }, () => Array(LCD_WIDTH).fill(0)),
@@ -440,6 +476,7 @@ function App() {
           const byteArray = pixelsToByteArray(pixelsRef.current);
           downloadBitMap(byteArray);
         }}>Download</button>
+        <input type="file" onChange={handleFileUpload}/>
         <button onClick={clearCanvas}>Clear Canvas</button>
       </div>
 
