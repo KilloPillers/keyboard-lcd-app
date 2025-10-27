@@ -30,7 +30,7 @@ function Summary() {
           width: 600,
           height: 600,
         }}
-        src="collage.png"
+        src="collage_small.png"
         alt="Images"
       ></img>
     </div>
